@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Счётчик кликов</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f9f9f9;
+      font-family: sans-serif;
+    }
+
+    button {
+      background-color: #e63946;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 20px 40px;
+      font-size: 24px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    #counter {
+      margin-top: 20px;
+      font-size: 28px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <button id="clickBtn">Нажми меня</button>
+  <div id="counter">0</div>
+
+  <script>
+    const btn = document.getElementById("clickBtn");
+    const counter = document.getElementById("counter");
+
+    async function updateCounter() {
+      const res = await fetch("/count");
+      const data = await res.json();
+      counter.textContent = data.count;
+    }
+
+    btn.addEventListener("click", async () => {
+      const res = await fetch("/click", { method: "POST" });
+      const data = await res.json();
+      counter.textContent = data.count;
+    });
+
+    updateCounter();
+  </script>
+</body>
+</html>
