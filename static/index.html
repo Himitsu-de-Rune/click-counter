@@ -13,6 +13,7 @@
       justify-content: center;
       height: 100vh;
     }
+
     input, button {
       margin: 5px;
       padding: 10px 20px;
@@ -20,16 +21,36 @@
       border-radius: 10px;
       border: none;
     }
+
     button {
       cursor: pointer;
       transition: transform 0.1s;
     }
+
     button:hover { transform: scale(1.05); }
-    .inc { background: #e63946; color: white; }
-    .dec { background: #457b9d; color: white; }
-    .reset { background: #2a9d8f; color: white; }
-    #stats { margin-top: 20px; font-size: 24px; }
-    #error { color: red; margin-top: 10px; }
+
+    .inc { background: #e63946; color: white; width: 50px; }
+    .dec { background: #457b9d; color: white; width: 50px; }
+    .reset { background: #2a9d8f; color: white; width: 94px; }
+
+    #buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #stats {
+      margin-top: 20px;
+      font-size: 24px;
+      text-align: center;
+      width: 400px;
+    }
+
+    #error {
+      color: red;
+      margin-top: 10px;
+      min-height: 1.2em;
+    }
   </style>
 </head>
 <body>
@@ -41,10 +62,12 @@
   </div>
 
   <div id="main" style="display:none;">
-    <button class="inc">+</button>
-    <button class="dec">-</button>
-    <button class="reset">Сброс</button>
-    <div id="stats"></div>
+    <div id="buttons">
+      <button class="inc">+</button>
+      <button class="dec">-</button>
+      <button class="reset">Сброс</button>
+    </div>
+    <div id="stats">0</div>
     <div id="error"></div>
   </div>
 
