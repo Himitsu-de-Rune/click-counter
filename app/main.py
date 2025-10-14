@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from . import models, database
 
+
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
