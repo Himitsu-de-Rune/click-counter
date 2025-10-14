@@ -1,63 +1,110 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Счётчик кликов</title>
+  <meta charset="UTF-8">
+  <title>Click Counter Pro</title>
   <style>
     body {
+      font-family: sans-serif;
+      background: #f2f2f2;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
-      background-color: #f9f9f9;
-      font-family: sans-serif;
     }
-
-    button {
-      background-color: #e63946;
-      color: white;
-      border: none;
+    input, button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 18px;
       border-radius: 10px;
-      padding: 20px 40px;
-      font-size: 24px;
+      border: none;
+    }
+    button {
       cursor: pointer;
       transition: transform 0.1s;
     }
-
-    button:hover {
-      transform: scale(1.05);
-    }
-
-    #counter {
-      margin-top: 20px;
-      font-size: 28px;
-      color: #333;
-    }
+    button:hover { transform: scale(1.05); }
+    .inc { background: #e63946; color: white; }
+    .dec { background: #457b9d; color: white; }
+    .reset { background: #2a9d8f; color: white; }
+    #stats { margin-top: 20px; font-size: 24px; }
+    #error { color: red; margin-top: 10px; }
   </style>
 </head>
 <body>
-  <button id="clickBtn">Нажми меня</button>
-  <div id="counter">0</div>
+  <h1>Click Counter Pro</h1>
+
+  <div id="login">
+    <input id="username" placeholder="Введите имя" />
+    <button id="start">Начать</button>
+  </div>
+
+  <div id="main" style="display:none;">
+    <button class="inc">+</button>
+    <button class="dec">-</button>
+    <button class="reset">Сброс</button>
+    <div id="stats"></div>
+    <div id="error"></div>
+  </div>
 
   <script>
-    const btn = document.getElementById("clickBtn");
-    const counter = document.getElementById("counter");
+    const usernameInput = document.getElementById("username");
+    const startBtn = document.getElementById("start");
+    const mainDiv = document.getElementById("main");
+    const stats = document.getElementById("stats");
+    const errorDiv = document.getElementById("error");
 
-    async function updateCounter() {
-      const res = await fetch("/count");
+    let username = null;
+    let ws = null;
+
+    startBtn.onclick = async () => {
+      username = usernameInput.value.trim();
+      if (!username) return alert("Введите имя!");
+
+      await fetch("/register", {
+        method: "POST",
+        body: new URLSearchParams({ username }),
+      });
+
+      document.getElementById("login").style.display = "none";
+      mainDiv.style.display = "block";
+      connectWS();
+      updateStats();
+    };
+
+    async function sendAction(action) {
+      const res = await fetch("/action", {
+        method: "POST",
+        body: new URLSearchParams({ username, action }),
+      });
       const data = await res.json();
-      counter.textContent = data.count;
+      if (data.error) errorDiv.textContent = data.error;
+      else {
+        errorDiv.textContent = "";
+        stats.textContent = `Ты: ${data.user_count} | Все вместе: ${data.total}`;
+      }
     }
 
-    btn.addEventListener("click", async () => {
-      const res = await fetch("/click", { method: "POST" });
+    async function updateStats() {
+      const res = await fetch(`/stats?username=${username}`);
       const data = await res.json();
-      counter.textContent = data.count;
-    });
+      stats.textContent = `Ты: ${data.user_count} | Все вместе: ${data.total}`;
+    }
 
-    updateCounter();
+    function connectWS() {
+      ws = new WebSocket(`ws://${location.host}/ws`);
+      ws.onmessage = (e) => {
+        const data = JSON.parse(e.data);
+        if (data.total !== undefined) {
+          updateStats();
+        }
+      };
+    }
+
+    document.querySelector(".inc").onclick = () => sendAction("inc");
+    document.querySelector(".dec").onclick = () => sendAction("dec");
+    document.querySelector(".reset").onclick = () => sendAction("reset");
   </script>
 </body>
 </html>
