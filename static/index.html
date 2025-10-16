@@ -28,7 +28,25 @@
     .inc { background: #e63946; color: white; }
     .dec { background: #457b9d; color: white; }
     .reset { background: #2a9d8f; color: white; }
-    #stats { margin-top: 20px; font-size: 24px; }
+
+    #main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    #stats {
+      font-size: 24px;
+      text-align: center;
+      min-width: 200px;
+    }
+
     #error { color: red; margin-top: 10px; }
   </style>
 </head>
@@ -41,9 +59,11 @@
   </div>
 
   <div id='main' style='display:none;'>
-    <button class='inc'>+</button>
-    <button class='dec'>-</button>
-    <button class='reset'>Сброс</button>
+    <div id='buttons'>
+      <button class='inc'>+</button>
+      <button class='dec'>-</button>
+      <button class='reset'>Сброс</button>
+    </div>
     <div id='stats'>
       Ты: <span id='user_count'>0</span> |
       Все вместе: <span id='total_count'>0</span>
@@ -55,7 +75,6 @@
     const usernameInput = document.getElementById('username');
     const startBtn = document.getElementById('start');
     const mainDiv = document.getElementById('main');
-    const stats = document.getElementById('stats');
     const errorDiv = document.getElementById('error');
     const userSpan = document.getElementById('user_count');
     const totalSpan = document.getElementById('total_count');
@@ -73,7 +92,7 @@
       });
 
       document.getElementById('login').style.display = 'none';
-      mainDiv.style.display = 'block';
+      mainDiv.style.display = 'flex';
       connectWS();
       updateStats();
     };
@@ -100,31 +119,43 @@
     function updateUserStats(userCount, totalCount) {
       const oldUserCount = parseInt(userSpan.textContent);
       userSpan.textContent = userCount;
-      totalSpan.textContent = totalCount;
 
       if (userCount > oldUserCount) {
         userSpan.style.color = '#228B22';
       } else if (userCount < oldUserCount) {
         userSpan.style.color = '#e63946';
       }
-    
       userSpan.style.transition = 'color 0.3s';
       setTimeout(() => userSpan.style.color = '#333', 300);
+
+      const oldTotal = parseInt(totalSpan.textContent);
+      totalSpan.textContent = totalCount;
+
+      if (totalCount > oldTotal) {
+        totalSpan.style.color = '#006400';
+      } else if (totalCount < oldTotal) {
+        totalSpan.style.color = '#8B0000';
+      }
+      totalSpan.style.transition = 'color 0.3s';
+      setTimeout(() => totalSpan.style.color = '#333', 300);
     }
 
     function connectWS() {
-      ws = new WebSocket(`ws://${location.host}/ws`);
+      const protocol = location.protocol === 'https:' ? 'wss' : 'ws';
+      ws = new WebSocket(`${protocol}://${location.host}/ws`);
+      
       ws.onmessage = (e) => {
         const data = JSON.parse(e.data);
         if (data.total !== undefined) {
           const oldTotal = parseInt(totalSpan.textContent);
           totalSpan.textContent = data.total;
-          
-          if (totalSpan.textContent > oldTotal) {
+
+          if (data.total > oldTotal) {
             totalSpan.style.color = '#006400';
-          } else if (totalSpan.textContent < oldTotal) {
+          } else if (data.total < oldTotal) {
             totalSpan.style.color = '#8B0000';
           }
+
           totalSpan.style.transition = 'color 0.3s';
           setTimeout(() => totalSpan.style.color = '#333', 300);
         }
