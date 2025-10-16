@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang='ru'>
 <head>
-  <meta charset="UTF-8">
+  <meta charset='UTF-8'>
   <title>Click Counter Pro</title>
   <style>
     body {
@@ -56,55 +56,55 @@
 <body>
   <h1>Click Counter Pro</h1>
 
-  <div id="login">
-    <input id="username" placeholder="Введите имя" />
-    <button id="start">Начать</button>
+  <div id='login'>
+    <input id='username' placeholder='Введите имя' />
+    <button id='start'>Начать</button>
   </div>
 
-  <div id="main" style="display:none;">
-    <div id="buttons">
-      <button class="inc">+</button>
-      <button class="dec">-</button>
-      <button class="reset">Сброс</button>
+  <div id='main' style='display:none;'>
+    <div id='buttons'>
+      <button class='inc'>+</button>
+      <button class='dec'>-</button>
+      <button class='reset'>Сброс</button>
     </div>
-    <div id="stats">0</div>
-    <div id="error"></div>
+    <div id='stats'>0</div>
+    <div id='error'></div>
   </div>
 
   <script>
-    const usernameInput = document.getElementById("username");
-    const startBtn = document.getElementById("start");
-    const mainDiv = document.getElementById("main");
-    const stats = document.getElementById("stats");
-    const errorDiv = document.getElementById("error");
+    const usernameInput = document.getElementById('username');
+    const startBtn = document.getElementById('start');
+    const mainDiv = document.getElementById('main');
+    const stats = document.getElementById('stats');
+    const errorDiv = document.getElementById('error');
 
     let username = null;
     let ws = null;
 
     startBtn.onclick = async () => {
       username = usernameInput.value.trim();
-      if (!username) return alert("Введите имя!");
+      if (!username) return alert('Введите имя!');
 
-      await fetch("/register", {
-        method: "POST",
+      await fetch('/register', {
+        method: 'POST',
         body: new URLSearchParams({ username }),
       });
 
-      document.getElementById("login").style.display = "none";
-      mainDiv.style.display = "block";
+      document.getElementById('login').style.display = 'none';
+      mainDiv.style.display = 'block';
       connectWS();
       updateStats();
     };
 
     async function sendAction(action) {
-      const res = await fetch("/action", {
-        method: "POST",
+      const res = await fetch('/action', {
+        method: 'POST',
         body: new URLSearchParams({ username, action }),
       });
       const data = await res.json();
       if (data.error) errorDiv.textContent = data.error;
       else {
-        errorDiv.textContent = "";
+        errorDiv.textContent = '';
         stats.textContent = `Ты: ${data.user_count} | Все вместе: ${data.total}`;
       }
     }
@@ -125,9 +125,9 @@
       };
     }
 
-    document.querySelector(".inc").onclick = () => sendAction("inc");
-    document.querySelector(".dec").onclick = () => sendAction("dec");
-    document.querySelector(".reset").onclick = () => sendAction("reset");
+    document.querySelector('.inc').onclick = () => sendAction('inc');
+    document.querySelector('.dec').onclick = () => sendAction('dec');
+    document.querySelector('.reset').onclick = () => sendAction('reset');
   </script>
 </body>
 </html>
