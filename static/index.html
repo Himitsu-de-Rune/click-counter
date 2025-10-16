@@ -13,7 +13,6 @@
       justify-content: center;
       height: 100vh;
     }
-
     input, button {
       margin: 5px;
       padding: 10px 20px;
@@ -21,36 +20,16 @@
       border-radius: 10px;
       border: none;
     }
-
     button {
       cursor: pointer;
       transition: transform 0.1s;
     }
-
     button:hover { transform: scale(1.05); }
-
-    .inc { background: #e63946; color: white; width: 50px; }
-    .dec { background: #457b9d; color: white; width: 50px; }
-    .reset { background: #2a9d8f; color: white; width: 94px; }
-
-    #buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    #stats {
-      margin-top: 20px;
-      font-size: 24px;
-      text-align: center;
-      width: 400px;
-    }
-
-    #error {
-      color: red;
-      margin-top: 10px;
-      min-height: 1.2em;
-    }
+    .inc { background: #e63946; color: white; }
+    .dec { background: #457b9d; color: white; }
+    .reset { background: #2a9d8f; color: white; }
+    #stats { margin-top: 20px; font-size: 24px; }
+    #error { color: red; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -62,12 +41,13 @@
   </div>
 
   <div id='main' style='display:none;'>
-    <div id='buttons'>
-      <button class='inc'>+</button>
-      <button class='dec'>-</button>
-      <button class='reset'>Сброс</button>
+    <button class='inc'>+</button>
+    <button class='dec'>-</button>
+    <button class='reset'>Сброс</button>
+    <div id='stats'>
+      Ты: <span id='user_count'>0</span> |
+      Все вместе: <span id='total_count'>0</span>
     </div>
-    <div id='stats'>0</div>
     <div id='error'></div>
   </div>
 
@@ -77,6 +57,8 @@
     const mainDiv = document.getElementById('main');
     const stats = document.getElementById('stats');
     const errorDiv = document.getElementById('error');
+    const userSpan = document.getElementById('user_count');
+    const totalSpan = document.getElementById('total_count');
 
     let username = null;
     let ws = null;
@@ -105,14 +87,29 @@
       if (data.error) errorDiv.textContent = data.error;
       else {
         errorDiv.textContent = '';
-        stats.textContent = `Ты: ${data.user_count} | Все вместе: ${data.total}`;
+        updateUserStats(data.user_count, data.total);
       }
     }
 
     async function updateStats() {
       const res = await fetch(`/stats?username=${username}`);
       const data = await res.json();
-      stats.textContent = `Ты: ${data.user_count} | Все вместе: ${data.total}`;
+      updateUserStats(data.user_count, data.total);
+    }
+
+    function updateUserStats(userCount, totalCount) {
+      const oldUserCount = parseInt(userSpan.textContent);
+      userSpan.textContent = userCount;
+      totalSpan.textContent = totalCount;
+
+      if (userCount > oldUserCount) {
+        userSpan.style.color = '#228B22';
+      } else if (userCount < oldUserCount) {
+        userSpan.style.color = '#e63946';
+      }
+    
+      userSpan.style.transition = 'color 0.3s';
+      setTimeout(() => userSpan.style.color = '#333', 300);
     }
 
     function connectWS() {
@@ -120,7 +117,16 @@
       ws.onmessage = (e) => {
         const data = JSON.parse(e.data);
         if (data.total !== undefined) {
-          updateStats();
+          const oldTotal = parseInt(totalSpan.textContent);
+          totalSpan.textContent = data.total;
+          
+          if (totalSpan.textContent > oldTotal) {
+            totalSpan.style.color = '#006400';
+          } else if (totalSpan.textContent < oldTotal) {
+            totalSpan.style.color = '#8B0000';
+          }
+          totalSpan.style.transition = 'color 0.3s';
+          setTimeout(() => totalSpan.style.color = '#333', 300);
         }
       };
     }
