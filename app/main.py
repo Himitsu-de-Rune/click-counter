@@ -4,7 +4,6 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from . import models, database
 
-
 app = FastAPI()
 app.mount('/static', StaticFiles(directory='static'), name='static')
 
@@ -20,7 +19,7 @@ def get_db():
         db.close()
 
 
-def get_user(db: Session, username: str):
+def get_user_or_none(db: Session, username: str):
     return db.query(models.User).filter(models.User.username == username).first()
 
 def get_total_count(db: Session):
@@ -33,7 +32,7 @@ async def index():
 
 @app.post('/register')
 async def register(username: str = Form(...), db: Session = Depends(get_db)):
-    user = get_user(db, username)
+    user = get_user_or_none(db, username)
     if user:
         return {'ok': True}
     db_user = models.User(username=username)
@@ -45,9 +44,9 @@ async def register(username: str = Form(...), db: Session = Depends(get_db)):
 async def action(
     username: str = Form(...),
     action: str = Form(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-    user = get_user(db, username)
+    user = get_user_or_none(db, username)
     if not user:
         return {'error': 'User not found'}
 
@@ -72,7 +71,7 @@ async def action(
 
 @app.get('/stats')
 async def stats(username: str, db: Session = Depends(get_db)):
-    user = get_user(db, username)
+    user = get_user_or_none(db, username)
     if not user:
         return {'user_count': 0, 'total': get_total_count(db)}
     return {'user_count': user.count, 'total': get_total_count(db)}

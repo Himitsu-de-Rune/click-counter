@@ -5,6 +5,7 @@ __pycache__/
 *.swp
 *.egg
 *.egg-info/
+*.db
 dist/
 build/
 .env
